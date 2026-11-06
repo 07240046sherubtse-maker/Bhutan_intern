@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Find genuine internship opportunities with verified organisations in Bhutan.">
+    <title><%= title %> | Bhutan InternshipLink</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <script src="/js/main.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="InternHub home"><img class="brand-logo" src="/images/internhub-logo.png" alt="InternHub — Internships and part-time jobs"></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open navigation"><span></span><span></span><span></span></button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/internships">Find internships</a>
+        <a href="/companies">Companies</a>
+        <a href="/about">About</a>
+        <% if (currentUser) { %>
+          <a class="nav-cta" href="<%= currentUser.role === 'admin' ? '/admin' : '/dashboard' %>">My dashboard</a>
+          <form action="/logout" method="post" class="inline-form"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="nav-link" type="submit">Sign out</button></form>
+          <a class="notification-link" href="<%= currentUser.role === 'admin' ? '/admin/notifications' : '/notifications' %>" aria-label="<%= unreadNotificationCount ? `${unreadNotificationCount} unread notifications` : 'Notifications' %>" title="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+            <% if (unreadNotificationCount > 0) { %><span class="notification-badge"><%= unreadNotificationCount > 99 ? '99+' : unreadNotificationCount %></span><% } %>
+          </a>
+          <a class="profile-icon-link" href="<%= currentUser.role === 'admin' ? '/admin/profile' : '/profile' %>" aria-label="Profile for <%= currentUser.name %>" title="<%= currentUser.name %>"><%= currentUser.name.trim().charAt(0).toUpperCase() %></a>
+        <% } else { %>
+          <a class="nav-cta" href="/login">Sign in / Sign up</a>
+        <% } %>
+      </nav>
+    </header>
+    <% if (currentUser?.role === 'user') { %><nav class="account-nav" aria-label="Seeker dashboard"><a href="/dashboard">Overview</a><a href="/internships">Find internships</a><a href="/applications">My applications</a><a href="/my-internships">My internships</a><a href="/extensions">Extensions</a><a href="/documents">Documents</a><a href="/settings">Settings</a></nav><% } %>
+    <% if (currentUser?.role === 'admin') { %><nav class="account-nav" aria-label="Administrator dashboard"><a href="/admin">Overview</a><a href="/admin/companies">Companies</a><a href="/admin/internships">Internships</a><a href="/admin/applications">Applications</a><a href="/admin/interns">Interns</a><a href="/admin/users">Users</a><a href="/admin/extensions">Extensions</a><a href="/admin/reports">Reports</a><a href="/admin/settings">Settings</a></nav><% } %>
+    <% if (notice) { %><div class="notice" role="status"><%= notice %></div><% } %>
+    <main>

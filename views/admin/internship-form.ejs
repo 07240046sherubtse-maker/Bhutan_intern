@@ -1,0 +1,30 @@
+<%- include('../partials/header', { title }) %>
+<section class="dashboard-head"><div><a class="back-link" href="/admin/internships">← Internships</a><span class="eyebrow">Confirmed opportunities</span><h1><%= internship ? 'Edit internship' : 'Add an internship' %></h1><p>Unconfirmed opportunities must remain unpublished.</p></div></section>
+<% if(!internship && !companies.length){ %><div class="notice notice-warn">Add, verify and activate a participating company before creating an internship.</div><% } %>
+<form class="content-panel form-grid" method="post" action="<%= internship ? `/admin/internships/${internship.id}/edit` : '/admin/internships' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <% if(internship){ %><p class="span-two form-notice">Organisation: <strong><%= internship.company_name %></strong> (company association is retained for existing application history).</p><% }else{ %><label class="span-two">Company<select name="company_id" required><option value="">Select a verified company</option><% companies.forEach((company)=>{ %><option value="<%= company.id %>"><%= company.name %></option><% }) %></select></label><% } %>
+  <label>Internship title<input name="title" value="<%= internship?.title || '' %>" required minlength="3" maxlength="200"></label>
+  <label>Category<select name="category"><% categories.forEach((category)=>{ %><option <%= internship?.category===category.name?'selected':'' %>><%= category.name %></option><% }) %><option <%= internship && !categories.some((item)=>item.name===internship.category)?'selected':'' %>>Other</option></select></label>
+  <label class="span-two">Description<textarea name="description" rows="5" required minlength="10" maxlength="12000"><%= internship?.description || '' %></textarea></label>
+  <label>Type<select name="internship_type" required><% ['short-term','long-term','vacation','part-time','full-time','flexible'].forEach((value)=>{ %><option value="<%= value %>" <%= internship?.internship_type===value?'selected':'' %>><%= value.replace('-',' ') %></option><% }) %></select></label>
+  <label>Work arrangement<select name="work_arrangement"><% ['on-site','hybrid','remote'].forEach((value)=>{ %><option value="<%= value %>" <%= internship?.work_arrangement===value?'selected':'' %>><%= value %></option><% }) %></select></label>
+  <label>Duration<input name="duration" value="<%= internship?.duration || '' %>" placeholder="e.g. 3 months" maxlength="100"></label>
+  <label>Working hours<input name="working_hours" value="<%= internship?.working_hours || '' %>" placeholder="e.g. 5 days per week" maxlength="120"></label>
+  <label>Number of positions<input type="number" name="positions" min="1" max="10000" value="<%= internship?.positions || 1 %>" required></label>
+  <label>Monthly allowance (Nu.)<input type="number" name="stipend_nu" min="0" max="10000000" step="0.01" value="<%= internship?.stipend_nu ?? '' %>"></label>
+  <label>Location<input name="location" value="<%= internship?.location || '' %>" maxlength="200"></label>
+  <label>Dzongkhag<input name="dzongkhag" value="<%= internship?.dzongkhag || '' %>" maxlength="100"></label>
+  <label>Gewog<input name="gewog" value="<%= internship?.gewog || '' %>" maxlength="100"></label>
+  <label>Start date<input class="date-dmy" type="text" name="start_date" value="<%= toDateInputValue(internship?.start_date) %>" placeholder="DD/MM/YYYY" inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" aria-label="Start date (DD/MM/YYYY)"></label>
+  <label>End date<input class="date-dmy" type="text" name="end_date" value="<%= toDateInputValue(internship?.end_date) %>" placeholder="DD/MM/YYYY" inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" aria-label="End date (DD/MM/YYYY)"></label>
+  <label>Application deadline<input class="date-dmy" type="text" name="deadline" value="<%= toDateInputValue(internship?.deadline) %>" placeholder="DD/MM/YYYY" inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" aria-label="Application deadline (DD/MM/YYYY)"></label>
+  <label class="span-two">Qualifications<textarea name="qualifications" rows="3" maxlength="4000"><%= internship?.qualifications || '' %></textarea></label>
+  <label class="span-two">Skills<textarea name="skills" rows="2" maxlength="3000"><%= internship?.skills || '' %></textarea></label>
+  <label class="span-two">Required documents<textarea name="required_documents" rows="2" placeholder="CV, cover letter, certificates..." maxlength="2000"><%= internship?.required_documents || '' %></textarea></label>
+  <label>Status<select name="status"><% (internship ? ['draft','pending_confirmation','published','paused','filled','expired','archived'] : ['draft','pending_confirmation','published']).forEach((value)=>{ %><option value="<%= value %>" <%= internship?.status===value?'selected':'' %>><%= value.replace('_',' ') %></option><% }) %></select></label>
+  <label class="inline-check"><input type="checkbox" name="availability_confirmed" value="true"> The company confirmed this opportunity</label>
+  <p class="form-notice span-two">Only publish after confirming availability, positions and requirements with the company. Confirm availability each time you publish.</p>
+  <button class="button button-primary span-two" <%= !internship && !companies.length ? 'disabled' : '' %>><%= internship ? 'Save changes' : 'Save internship' %></button>
+</form>
+<%- include('../partials/footer') %>

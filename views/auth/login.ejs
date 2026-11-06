@@ -1,0 +1,15 @@
+<%- include('../partials/header', { title }) %>
+<section class="auth-wrap"><div class="auth-aside"><span class="eyebrow eyebrow-light">Welcome back</span><h1>Ready for your next step?</h1><p>Sign in as a user to find opportunities, or as an administrator to manage the platform.</p></div>
+  <div class="auth-card"><span class="eyebrow">Your account</span><h2>Sign in</h2><p class="muted">Choose your account type, then enter your credentials.</p>
+    <form method="post" action="/login" class="form-stack">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Sign in as<span class="auth-input-wrap"><svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"></circle><path d="M5 21a7 7 0 0 1 14 0"></path></svg><select name="role" required><option value="user" <%= role === 'user' ? 'selected' : '' %>>User</option><option value="admin" <%= role === 'admin' ? 'selected' : '' %>>Administrator</option></select></span></label>
+      <label>Email address<span class="auth-input-wrap"><svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg><input name="email" type="email" autocomplete="username" required maxlength="254"></span></label>
+      <label>Password<span class="auth-input-wrap"><svg class="auth-field-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><input name="password" type="password" autocomplete="current-password" required maxlength="128"></span></label>
+      <p class="auth-switch"><a href="/forgot-password">Forgot your password?</a></p>
+      <button class="button button-primary button-wide" type="submit">Sign in</button>
+    </form>
+    <p class="auth-switch">New to InternshipLink? <a href="/register">Create a user account</a></p>
+  </div>
+</section>
+<%- include('../partials/footer') %>

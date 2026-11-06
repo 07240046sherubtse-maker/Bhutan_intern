@@ -1,0 +1,24 @@
+<%- include('../partials/header', { title }) %>
+<section class="dashboard-head">
+  <div><a class="back-link" href="/admin/companies">← Companies</a><span class="eyebrow">Organisation details</span><h1><%= company ? 'Edit company' : 'Add a company' %></h1><p>Only confirmed organisations should be verified and activated.</p></div>
+</section>
+<form class="content-panel form-grid" method="post" enctype="multipart/form-data" action="<%= company ? `/admin/companies/${company.id}/edit` : '/admin/companies' %>">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label>Company name<input name="name" value="<%= company?.name || '' %>" required minlength="2" maxlength="180"></label>
+  <label>Industry<input name="industry" value="<%= company?.industry || '' %>" maxlength="120"></label>
+  <label class="span-two">Description<textarea name="description" rows="4" maxlength="5000"><%= company?.description || '' %></textarea></label>
+  <label>Office address<input name="address" value="<%= company?.address || '' %>" maxlength="500"></label>
+  <label>Dzongkhag<input name="dzongkhag" value="<%= company?.dzongkhag || '' %>" maxlength="100"></label>
+  <label>Official email<input name="email" type="email" value="<%= company?.email || '' %>" maxlength="254"></label>
+  <label>Phone<input name="phone" type="tel" value="<%= company?.phone || '' %>" maxlength="50"></label>
+  <label>Official website<input name="website" type="url" value="<%= company?.website || '' %>" maxlength="300" placeholder="https://"></label>
+  <label>Company logo<input name="logo" type="file" accept=".jpg,.jpeg,.png"><small>JPG or PNG, up to 5 MB. <%= company?.logo_stored_name ? 'Uploading a new logo replaces the current logo.' : '' %></small></label>
+  <label>Representative name<input name="representative" value="<%= company?.representative || '' %>" maxlength="150"></label>
+  <label>Representative email<input name="representative_email" type="email" value="<%= company?.representative_email || '' %>" maxlength="254"></label>
+  <label>Representative phone<input name="representative_phone" type="tel" value="<%= company?.representative_phone || '' %>" maxlength="50"></label>
+  <label>Verification status<select name="verification_status"><% [['pending','Pending verification'],['verified','Verified'],['rejected','Rejected']].forEach(([value,label]) => { %><option value="<%= value %>" <%= company?.verification_status===value?'selected':'' %>><%= label %></option><% }) %></select></label>
+  <label>Partnership status<select name="partnership_status"><% ['inactive','active','archived'].forEach((value) => { %><option value="<%= value %>" <%= company?.partnership_status===value?'selected':'' %>><%= value %></option><% }) %></select></label>
+  <p class="span-two form-notice">Only set a company to verified and active after the organisation confirms its participation.</p>
+  <button class="button button-primary span-two"><%= company ? 'Save company changes' : 'Save company' %></button>
+</form>
+<%- include('../partials/footer') %>

@@ -1,0 +1,23 @@
+<%- include('../partials/header', { title }) %>
+<section class="page-hero internships-page-hero"><span class="eyebrow">Make your next move</span><h1>Find an internship<br><span>that fits your future.</span></h1><p>Search current opportunities shared by verified and active organisations.</p></section>
+<section class="section listing-section">
+  <form class="filter-panel" method="get" action="/internships">
+    <label>Search by role<input name="q" value="<%= filters.q || '' %>" placeholder="e.g. designer, analyst"></label>
+    <label>Category<select name="category"><option value="">All categories</option><% categories.forEach((item) => { %><option value="<%= item.name %>" <%= filters.category === item.name ? 'selected' : '' %>><%= item.name %></option><% }) %></select></label>
+    <label>Company<select name="company_id"><option value="">All companies</option><% companies.forEach((company) => { %><option value="<%= company.id %>" <%= String(filters.company_id || '') === String(company.id) ? 'selected' : '' %>><%= company.name %></option><% }) %></select></label>
+    <label>Dzongkhag<input name="dzongkhag" value="<%= filters.dzongkhag || '' %>" placeholder="Any location"></label>
+    <label>Type<select name="type"><option value="">All types</option><% ['short-term','long-term','vacation','part-time','full-time','flexible'].forEach((item) => { %><option value="<%= item %>" <%= filters.type === item ? 'selected' : '' %>><%= item.replace('-', ' ') %></option><% }) %></select></label>
+    <label>Work arrangement<select name="arrangement"><option value="">All arrangements</option><% ['on-site','hybrid','remote'].forEach((item) => { %><option value="<%= item %>" <%= filters.arrangement === item ? 'selected' : '' %>><%= item %></option><% }) %></select></label>
+    <label>Duration<input name="duration" value="<%= filters.duration || '' %>" placeholder="e.g. 3 months"></label>
+    <label>Education requirement<input name="education" value="<%= filters.education || '' %>" placeholder="Qualification"></label>
+    <label>Allowance<select name="stipend"><option value="">Any allowance</option><option value="paid" <%= filters.stipend === 'paid' ? 'selected' : '' %>>Paid</option><option value="unpaid" <%= filters.stipend === 'unpaid' ? 'selected' : '' %>>No allowance</option></select></label>
+    <button class="button button-primary" type="submit">Search</button>
+  </form>
+  <div class="results-heading"><h2><%= internships.length %> <%= internships.length === 1 ? 'opportunity' : 'opportunities' %></h2><a href="/internships" class="text-link">Clear filters</a></div>
+  <% if (internships.length) { %><div class="card-grid"><% internships.forEach((internship) => { %><article class="internship-card">
+    <div class="card-topline"><span class="tag"><%= internship.internship_type.replace('-', ' ') %></span><span class="card-icon">↗</span></div><h3><a href="/internships/<%= internship.id %>"><%= internship.title %></a></h3><p class="company-line"><%= internship.company_name %></p>
+    <div class="card-meta"><span>⌖ <%= internship.dzongkhag || 'Bhutan' %></span><span><%= internship.category %></span><span><%= internship.duration || 'Duration varies' %></span></div>
+    <div class="card-bottom"><span><%= internship.stipend_nu ? `Nu. ${Number(internship.stipend_nu).toLocaleString("en-GB")} / month` : 'Allowance not specified' %></span><a href="/internships/<%= internship.id %>" aria-label="View <%= internship.title %>">→</a></div>
+  </article><% }) %></div><% } else { %><div class="empty-state"><span class="empty-icon">⌕</span><h3>No opportunities match those filters</h3><p>Try changing a filter, or check back as new openings are confirmed.</p><a class="button button-secondary" href="/internships">Show all internships</a></div><% } %>
+</section>
+<%- include('../partials/footer') %>
