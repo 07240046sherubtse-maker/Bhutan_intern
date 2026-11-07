@@ -1,52 +1,83 @@
-const nodemailer = require("nodemailer");
 
 function isEmailConfigured() {
-  return Boolean((process.env.SMTP_HOST || process.env.EMAIL_USER) && (process.env.SMTP_FROM || process.env.EMAIL_USER));
+  return Boolean(
+    process.env.GOOGLE_APPS_SCRIPT_URL &&
+    process.env.GOOGLE_APPS_SCRIPT_SECRET
+  );
 }
 
 function verificationRequired() {
-  if (process.env.EMAIL_VERIFICATION_REQUIRED === "false") return false;
-  return process.env.EMAIL_VERIFICATION_REQUIRED === "true" || isEmailConfigured();
+  if (process.env.EMAIL_VERIFICATION_REQUIRED === "false") {
+    return false;
+  }
+
+  return process.env.EMAIL_VERIFICATION_REQUIRED === "true" ||
+    isEmailConfigured();
 }
 
 function validateEmailConfiguration(required = false) {
-  const username = process.env.SMTP_USER || process.env.EMAIL_USER;
-  const password = process.env.SMTP_PASSWORD || process.env.EMAIL_APP_PASSWORD;
-  if (Boolean(username) !== Boolean(password)) throw new Error("Set both SMTP_USER and SMTP_PASSWORD, or leave both blank.");
-  if (required && !isEmailConfigured()) throw new Error("SMTP_HOST and SMTP_FROM must be configured when email verification is required.");
-  if (process.env.SMTP_PORT && (!/^\d+$/.test(process.env.SMTP_PORT) || Number(process.env.SMTP_PORT) > 65535 || Number(process.env.SMTP_PORT) < 1)) {
-    throw new Error("SMTP_PORT must be a valid TCP port.");
+  if (required && !isEmailConfigured()) {
+    throw new Error(
+      "Set GOOGLE_APPS_SCRIPT_URL and GOOGLE_APPS_SCRIPT_SECRET to enable email verification."
+    );
+  }
+
+  if (
+    process.env.GOOGLE_APPS_SCRIPT_URL &&
+    !process.env.GOOGLE_APPS_SCRIPT_URL.endsWith("/exec")
+  ) {
+    throw new Error(
+      "GOOGLE_APPS_SCRIPT_URL must be your deployed Apps Script /exec URL."
+    );
   }
 }
 
 function publicBaseUrl() {
-  return (process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/+$/, "");
-}
-
-let transporter;
-
-function getTransporter() {
-  if (!isEmailConfigured()) throw new Error("SMTP_HOST and SMTP_FROM must be configured to send email.");
-  if (!transporter) {
-    const port = Number.parseInt(process.env.SMTP_PORT || "587", 10);
-    if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("SMTP_PORT must be a valid TCP port.");
-    const username = process.env.SMTP_USER || process.env.EMAIL_USER;
-    const password = process.env.SMTP_PASSWORD || process.env.EMAIL_APP_PASSWORD;
-    const auth = username || password
-      ? { user: username || "", pass: password || "" }
-      : undefined;
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port,
-      secure: process.env.SMTP_SECURE === "true" || port === 465,
-      auth,
-    });
-  }
-  return transporter;
+  return (
+    process.env.PUBLIC_BASE_URL ||
+    `http://localhost:${process.env.PORT || 3000}`
+  ).replace(/\/+$/, "");
 }
 
 async function sendEmail({ to, subject, text }) {
-  await getTransporter().sendMail({ from: process.env.SMTP_FROM || process.env.EMAIL_USER, to, subject, text });
+  if (!isEmailConfigured()) {
+    throw new Error("Google Apps Script email service is not configured.");
+  }
+
+  const response = await fetch(process.env.GOOGLE_APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      token: process.env.GOOGLE_APPS_SCRIPT_SECRET,
+      to,
+      subject,
+      body: text,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Google email service returned HTTP ${response.status}.`
+    );
+  }
+
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error(
+      result.error || "Google Apps Script failed to send the email."
+    );
+  }
+
+  return result;
 }
 
-module.exports = { isEmailConfigured, publicBaseUrl, sendEmail, validateEmailConfiguration, verificationRequired };
+module.exports = {
+  isEmailConfigured,
+  publicBaseUrl,
+  sendEmail,
+  validateEmailConfiguration,
+  verificationRequired,
+};
